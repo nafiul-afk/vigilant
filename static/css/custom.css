@@ -1,0 +1,86 @@
+/* ─────────────────────────────────────────────────────────────────────────
+   Vigilant — Custom Styles
+   Supplements Tailwind with scrollbar, form, and animation refinements.
+   ───────────────────────────────────────────────────────────────────────── */
+
+/* ── Scrollbar ───────────────────────────────────────────────────────── */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+/* ── Date / select inputs in dark mode ───────────────────────────────── */
+input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(0.7);
+    cursor: pointer;
+}
+
+select option {
+    background: #1a1d23;
+    color: #e5e7eb;
+}
+
+/* ── Focus ring utility ──────────────────────────────────────────────── */
+.focus-ring:focus-visible {
+    outline: 2px solid rgba(42, 165, 255, 0.5);
+    outline-offset: 2px;
+}
+
+/* ── Filter pills ────────────────────────────────────────────────────── */
+.filter-pill {
+    background: transparent;
+    color: #9ca3af;
+    border: 1px solid transparent;
+}
+
+.filter-pill:hover {
+    background: rgba(255, 255, 255, 0.04);
+    color: #d1d5db;
+}
+
+.filter-pill.active {
+    background: rgba(42, 165, 255, 0.1);
+    color: #52c4ff;
+    border-color: rgba(42, 165, 255, 0.2);
+}
+
+/* ── Table row transitions ───────────────────────────────────────────── */
+.sub-row {
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.sub-row.hidden-by-filter {
+    display: none;
+}
+
+/* ── Glassmorphism card hover ────────────────────────────────────────── */
+.glass-card {
+    background: rgba(15, 17, 21, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(12px);
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.glass-card:hover {
+    border-color: rgba(42, 165, 255, 0.15);
+    box-shadow: 0 4px 30px rgba(42, 165, 255, 0.05);
+}
+
+/* ── Notification dropdown scroll ────────────────────────────────────── */
+#notif-dropdown .max-h-80 {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.08) transparent;
+}
