@@ -5,6 +5,7 @@ Uses pydantic-settings to pull from .env with validation and typing.
 
 from __future__ import annotations
 
+import os
 from functools import lru_cache
 from pathlib import Path
 
@@ -27,7 +28,7 @@ class Settings(BaseSettings):
     APP_NAME: str = "Vigilant"
     APP_VERSION: str = "1.0.0"
     DEBUG: bool = False
-    BASE_URL: str = "http://localhost:8000"
+    BASE_URL: str = os.getenv("RENDER_EXTERNAL_URL", "http://localhost:8000")
     SECRET_KEY: str = "change-me-in-production-use-openssl-rand-hex-32"
 
     # ── Database ─────────────────────────────────────────────────────────
