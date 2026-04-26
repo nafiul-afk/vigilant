@@ -9,6 +9,7 @@ import time
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from fastapi.middleware.proxy_headers import ProxyHeadersMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
@@ -62,6 +63,9 @@ app = FastAPI(
     version=settings.APP_VERSION,
     lifespan=lifespan,
 )
+
+# Trust proxy headers (needed for Render/Caddy/Nginx)
+app.add_middleware(ProxyHeadersMiddleware, trusted_hosts="*")
 
 # Static files
 app.mount("/static", StaticFiles(directory="static"), name="static")

@@ -8,7 +8,7 @@ from __future__ import annotations
 from functools import lru_cache
 from pathlib import Path
 
-from pydantic import field_validator
+from pydantic import field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 ROOT_DIR = Path(__file__).resolve().parent.parent.parent
@@ -27,6 +27,7 @@ class Settings(BaseSettings):
     APP_NAME: str = "Vigilant"
     APP_VERSION: str = "1.0.0"
     DEBUG: bool = False
+    BASE_URL: str = "http://localhost:8000"
     SECRET_KEY: str = "change-me-in-production-use-openssl-rand-hex-32"
 
     # ── Database ─────────────────────────────────────────────────────────
@@ -59,8 +60,15 @@ class Settings(BaseSettings):
     # ── OAuth2 — Google (Prep) ───────────────────────────────────────────
     GOOGLE_CLIENT_ID: str = ""
     GOOGLE_CLIENT_SECRET: str = ""
-    GOOGLE_REDIRECT_URI: str = "http://localhost:8000/auth/google/callback"
+    GOOGLE_REDIRECT_URI: str | None = None
     OAUTH_STATE_MAX_AGE: int = 600
+
+    @model_validator(mode="after")
+    def assemble_google_redirect_uri(self) -> "Settings":
+        """If GOOGLE_REDIRECT_URI is not provided, derive it from BASE_URL."""
+        if not self.GOOGLE_REDIRECT_URI:
+            self.GOOGLE_REDIRECT_URI = f"{self.BASE_URL.rstrip('/')}/auth/google/callback"
+        return self
 
     # ── Email / SMTP (Prep) ──────────────────────────────────────────────
     SMTP_HOST: str = ""
