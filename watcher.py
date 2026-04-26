@@ -18,6 +18,7 @@ import time
 from app.core.config import get_settings
 from app.database.session import SessionLocal
 from app.models.subscription import Subscription, TrialStatus
+from app.models.user import User
 from app.services import notification_service, subscription_service
 
 settings = get_settings()
@@ -81,9 +82,10 @@ def sweep() -> int:
             )
             alerts_created += 1
 
-            # Optional: send email too
-            # owner = db.query(User).get(sub.owner_id)
-            # notification_service.send_email_alert(owner.email, sub)
+            # Send email alert
+            owner = db.query(User).filter(User.id == sub.owner_id).first()
+            if owner:
+                notification_service.send_email_alert(owner.email, sub)
 
         logger.info("Created %d alert(s).", alerts_created)
     except Exception:

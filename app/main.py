@@ -5,15 +5,20 @@ Vigilant application entry point.
 from __future__ import annotations
 
 import logging
+import time
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
+
+import asyncio
+import threading
 from app.core.config import get_settings
 from app.database.session import Base, engine
 from app.routes import auth_routes, dashboard_routes, sub_routes
+import watcher
 
 settings = get_settings()
 
@@ -25,12 +30,29 @@ logging.basicConfig(
 logger = logging.getLogger("vigilant")
 
 
+def run_watcher_background():
+    """Run the watcher sweep in a separate thread."""
+    logger.info("Starting background watcher thread...")
+    while True:
+        try:
+            watcher.sweep()
+        except Exception as e:
+            logger.error(f"Watcher background thread error: {e}")
+        time.sleep(settings.WATCHER_POLL_INTERVAL)
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Create tables on startup (dev convenience). In prod use Alembic."""
     logger.info("Starting Vigilant v%s", settings.APP_VERSION)
     Base.metadata.create_all(bind=engine)
     logger.info("Database tables ensured.")
+    
+    # Start watcher thread if in single-process mode
+    # This is helpful for free hosting tiers like Render.
+    thread = threading.Thread(target=run_watcher_background, daemon=True)
+    thread.start()
+    
     yield
     logger.info("Shutting down Vigilant.")
 

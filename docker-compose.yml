@@ -1,0 +1,60 @@
+version: '3.8'
+
+services:
+  # ── Database ───────────────────────────────────────────────────────────
+  db:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_DATABASE: ${DB_NAME:-vigilant_db}
+      MYSQL_USER: ${DB_USER:-vigilant_user}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-vigilant_pass}
+      # IMPORTANT: Use a stronger password for production root and pass via env
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-vigilant_root_pass}
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./schema.sql:/docker-entrypoint-initdb.d/schema.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 10s
+      retries: 5
+
+  # ── Web Application ───────────────────────────────────────────────────
+  web:
+    build: .
+    restart: always
+    environment:
+      - USE_SQLITE=false
+      - DB_HOST=db
+      - DB_PORT=3306
+      - DB_USER=${DB_USER:-vigilant_user}
+      - DB_PASSWORD=${DB_PASSWORD:-vigilant_pass}
+      - DB_NAME=${DB_NAME:-vigilant_db}
+      - SECRET_KEY=${SECRET_KEY}
+      - DEBUG=false
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # ── Background Watcher ────────────────────────────────────────────────
+  watcher:
+    build: .
+    restart: always
+    command: python watcher.py
+    environment:
+      - USE_SQLITE=false
+      - DB_HOST=db
+      - DB_PORT=3306
+      - DB_USER=${DB_USER:-vigilant_user}
+      - DB_PASSWORD=${DB_PASSWORD:-vigilant_pass}
+      - DB_NAME=${DB_NAME:-vigilant_db}
+      - SECRET_KEY=${SECRET_KEY}
+      - DEBUG=false
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  mysql_data:

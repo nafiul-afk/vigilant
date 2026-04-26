@@ -1,0 +1,14 @@
+.venv/
+__pycache__/
+*.db
+*.sqlite
+.env
+.git/
+.gitignore
+.codex/
+README.md
+LICENSE
+run_web.sh
+run_watcher.sh
+Caddyfile
+docker-compose.yml

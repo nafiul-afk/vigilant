@@ -60,6 +60,7 @@ class Settings(BaseSettings):
     GOOGLE_CLIENT_ID: str = ""
     GOOGLE_CLIENT_SECRET: str = ""
     GOOGLE_REDIRECT_URI: str = "http://localhost:8000/auth/google/callback"
+    OAUTH_STATE_MAX_AGE: int = 600
 
     # ── Email / SMTP (Prep) ──────────────────────────────────────────────
     SMTP_HOST: str = ""
@@ -67,6 +68,9 @@ class Settings(BaseSettings):
     SMTP_USER: str = ""
     SMTP_PASSWORD: str = ""
     EMAIL_FROM: str = "alerts@vigilant.app"
+    SMTP_USE_TLS: bool = True
+    SMTP_USE_SSL: bool = False
+    SMTP_TIMEOUT: int = 20
 
     # ── Watcher ──────────────────────────────────────────────────────────
     WATCHER_POLL_INTERVAL: int = 60  # seconds between sweeps
@@ -83,6 +87,23 @@ class Settings(BaseSettings):
             if normalized in {"0", "false", "no", "off", "release", "production", "prod"}:
                 return False
         return value
+
+    @property
+    def GOOGLE_OAUTH_ENABLED(self) -> bool:
+        return bool(
+            self.GOOGLE_CLIENT_ID.strip()
+            and self.GOOGLE_CLIENT_SECRET.strip()
+            and self.GOOGLE_REDIRECT_URI.strip()
+        )
+
+    @property
+    def SMTP_ENABLED(self) -> bool:
+        return bool(
+            self.SMTP_HOST.strip()
+            and self.SMTP_USER.strip()
+            and self.SMTP_PASSWORD.strip()
+            and self.EMAIL_FROM.strip()
+        )
 
 
 @lru_cache()

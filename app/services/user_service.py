@@ -5,6 +5,7 @@ All user-related business logic lives here, never in the routes.
 
 from __future__ import annotations
 
+import logging
 from typing import Optional
 
 from sqlalchemy.exc import IntegrityError
@@ -12,6 +13,7 @@ from sqlalchemy.orm import Session
 
 from app.auth.hashing import hash_password, verify_password
 from app.models.user import User
+from app.services import notification_service
 
 
 def create_user(db: Session, email: str, username: str, password: str) -> User:
@@ -25,6 +27,8 @@ def create_user(db: Session, email: str, username: str, password: str) -> User:
     try:
         db.commit()
         db.refresh(user)
+        # Send welcome email
+        notification_service.send_welcome_email(user.email, user.username)
         return user
     except IntegrityError:
         db.rollback()
@@ -77,4 +81,6 @@ def get_or_create_oauth_user(
     db.add(user)
     db.commit()
     db.refresh(user)
+    # Send welcome email for new user
+    notification_service.send_welcome_email(user.email, user.username)
     return user
