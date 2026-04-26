@@ -33,13 +33,14 @@ def _load_signed(token: str, max_age: int) -> Optional[dict]:
 def create_session(response: Response, user_id: str) -> None:
     """Write a signed session cookie containing the user_id."""
     token = _dump_signed({"uid": user_id})
+    is_secure = settings.BASE_URL.startswith("https")
     response.set_cookie(
         key=SESSION_COOKIE,
         value=token,
         max_age=settings.SESSION_MAX_AGE,
         httponly=True,
         samesite="lax",
-        secure=False,  # set True in production behind HTTPS
+        secure=is_secure,
     )
 
 
@@ -66,13 +67,14 @@ def set_signed_cookie(
     max_age: int,
 ) -> None:
     """Set an additional signed cookie for short-lived flows like OAuth state."""
+    is_secure = settings.BASE_URL.startswith("https")
     response.set_cookie(
         key=key,
         value=_dump_signed(payload),
         max_age=max_age,
         httponly=True,
         samesite="lax",
-        secure=False,
+        secure=is_secure,
     )
 
 
